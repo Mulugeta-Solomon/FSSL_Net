@@ -84,7 +84,10 @@ class Hourglass(nn.Module):
 
         return out 
     
-
+    def forward(self, x):
+        return self._hour_glass_forward(self.depth, x)
+    
+    
         
 
     
