@@ -150,6 +150,31 @@ class HourglassNet(nn.Module):
 
         return nn.Sequential(conv, bn, self.relu)
     
+    def forward(self, x):
+        out = []
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+
+        x = self.layer1(x)
+        x = self.maxpool(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+
+        for i in range(self.num_stacks):
+             y = self.hg[i](x)
+             y = self.res[i](y)
+             y = self.fc[i](y)
+             score = self.score[i](y)
+             out.append(score)
+
+             if i < self.num_stacks - 1:
+                 fc_ = self.fc_[i](y)
+                 score_ = self.score_[i](score)
+                 x = x + fc_ + score_
+
+        return out[::-1], y
+    
     
     
         
