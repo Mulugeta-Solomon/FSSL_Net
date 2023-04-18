@@ -48,7 +48,13 @@ class Hourglass(nn.Module):
         self.block = block
         self.hg = self._make_hour_glass(block, num_block, planes, depth)
 
+    def _make_residual(self, block, num_blocks, planes, depth):
+        layers = []
+        
+        for i in range(0, num_blocks):
+            layers.append(block(planes * block.expansion, planes))
 
+        return nn.Sequential(*layers)
 
     
         
