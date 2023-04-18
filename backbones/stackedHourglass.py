@@ -41,3 +41,17 @@ class Bottleneck2D(nn.Module):
 
         return out 
     
+class Hourglass(nn.Module):
+    def __init__(self, block, num_block, planes, depth):
+        super(Hourglass, self).__init__()
+        self.depth = depth
+        self.block = block
+        self.hg = self._make_hour_glass(block, num_block, planes, depth)
+
+
+
+    
+        
+
+
+    
