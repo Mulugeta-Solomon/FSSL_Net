@@ -129,7 +129,22 @@ class HourglassNet(nn.Module):
         self.fc_ = nn.ModuleList(fc_)
         self,score_ = nn.ModuleList(score_)
 
-       
+    def _make_residual(self, block, planes, blocks, stride=1):
+        downsample = None
+
+        if stride != 1 or self.inplanes != planes * block.expansion:
+            downsample = nn.Sequential(nn.Conv2d(self.inplanes, planes * block.expansion, kernel_size=1, stride=stride))
+        
+        layers = []
+        layers.append(block(self.inplanes, planes, stride, downsample))
+        self.inplanes = planes * block.expansion 
+
+        for i in range(1, blocks):
+            layers.append(block(self.inplanes, planes))
+
+        return nn.Sequential(*layers)
+    
+     
     
     
         
