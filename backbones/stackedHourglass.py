@@ -87,6 +87,50 @@ class Hourglass(nn.Module):
     def forward(self, x):
         return self._hour_glass_forward(self.depth, x)
     
+class HourglassNet(nn.Module):
+    """Hourglass model from Newell et al ECCV 2016"""
+
+    def __init__(self, input_channels, inplanes, num_feats, block, head, depth, num_stacks, num_blocks, num_classes):
+        super(HourglassNet, self).__init__()
+
+        self.inplanes = inplanes
+        self.num_feats = num_feats
+        self.num_stacks = num_stacks
+        self.conv1 = nn.Conv2d(input_channels, self.inplanes, kernel_size=7, stride=2, padding=3)
+        self.bn1 = nn.BatchNorm2d(self.inplanes)
+        self.relu = nn.ReLU(inplace=True)
+        self.layer1 = self._make_residual(block, self.inplanes, 1)
+        self.layer2 = self._make_residual(block, self.inplanes, 1)
+        self.layer3 = self._make_residual(block, self.num_feats, 1)
+        self.maxpool = nn.MaxPool2d(2, stride=2)
+
+        # build hourglass module 
+        ch = self.num_feats * block.expansion
+
+        # vpts = []
+        hg, res, fc, score, fc_, score_ = [], [], [], [], []
+
+        for i in range(num_stacks):
+            hg.append(Hourglass(block, num_blocks, self.num_feats, depth)) 
+            res.append(self._make_residual(block, self.num_feats, num_blocks))
+            fc.append(self._make_fc(ch, ch))
+            score.append(head(ch, num_classes))
+
+
+            if i < num_stacks - 1:
+                fc_.append(nn.Conv2d(ch, ch, kernel_size=1))
+                score_.append(nn.Conv2d(num_classes, ch, kernel_size=1))
+
+        self.hg = nn.ModuleList(hg)
+        self.res = nn.ModuleList(res)
+        self.fc = nn.ModuleList(fc)
+        self.score = nn.ModuleList(score)
+
+        self.fc_ = nn.ModuleList(fc_)
+        self,score_ = nn.ModuleList(score_)
+
+       
+    
     
         
 
